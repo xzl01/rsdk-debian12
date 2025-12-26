@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+export DH_VERBOSE=1
+IMAGE_NAME ?= rsdk-debian12
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	@arch=$(shell dpkg --print-architecture 2>/dev/null || echo amd64); \
+	imgdir=debian/tmp/usr/share/rsdk-debian12/images/$$arch; \
+	mkdir -p $$imgdir; \
+	if command -v docker >/dev/null 2>&1; then \
+	  echo "Pulling $(IMAGE_NAME) for platform linux/$$arch ..."; \
+	  docker pull --platform=linux/$$arch $(IMAGE_NAME) >/dev/null || true; \
+	  echo "Saving image to $$imgdir/image.tar ..."; \
+	  docker save $(IMAGE_NAME) -o $$imgdir/image.tar || true; \
+	else \
+	  # If docker not available, try to find a prebuilt tar in debian/images
+	  if [ -f debian/images/$$arch/image.tar ]; then \
+	    cp debian/images/$$arch/image.tar $$imgdir/image.tar; \
+	  else \
+	    echo "WARNING: docker not available and no prebuilt image found for $$arch"; \
+	  fi; \
+	fi

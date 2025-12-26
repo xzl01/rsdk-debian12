@@ -1,0 +1,12 @@
+Source: rsdk-debian12
+Section: misc
+Priority: optional
+Maintainer: You <you@example.com>
+Standards-Version: 4.5.0
+
+Package: rsdk-debian12
+Architecture: any
+Depends: ${misc:Depends}, docker.io | docker-ce
+Description: Offline Docker image package for Debian 12
+ This package contains a pre-pulled Docker image tarball and will attempt
+ to load it into Docker on installation if Docker is available on the host.
