@@ -6,7 +6,7 @@ IMAGE_NAME ?= rsdk-debian12
 	dh $@
 
 override_dh_auto_build:
-	@archs="amd64 arm64"; \
+		archs="amd64 arm64"; \
 	for arch in $$archs; do \
 	  imgdir=debian/tmp/usr/share/rsdk-debian12/images/$$arch; \
 	  mkdir -p $$imgdir; \

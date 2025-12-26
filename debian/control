@@ -3,7 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: You <you@example.com>
 Standards-Version: 4.5.0
-Build-Depends: debhelper (>= 13), dpkg-dev, docker.io | docker-ce, docker-buildx-plugin, qemu-user-static
+Build-Depends: debhelper (>= 13), qemu-user-static, binfmt-support, docker.io | docker-ce
 
 Package: rsdk-debian12
 Architecture: any
