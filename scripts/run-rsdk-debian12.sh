@@ -32,7 +32,9 @@ IMG_TO_RUN=""
 if [ -n "$(docker images -q "$IMAGE_HINT")" ]; then
   IMG_TO_RUN="$IMAGE_HINT"
 else
-  IMG_TO_RUN=$(docker images --format '{{.Repository}}:{{.Tag}}' | head -n1)
+  IMG_TO_RUN=$(docker images --format '{{.Repository}}:{{.Tag}}' \
+    | grep -v '^<none>:<none>$' \
+    | head -n1)
 fi
 
 if [ -z "$IMG_TO_RUN" ]; then
@@ -44,12 +46,12 @@ fi
 HOST_PERSIST_DIR=/var/lib/rsdk-debian12
 mkdir -p "$HOST_PERSIST_DIR"
 
-# Default mounts: bind host /etc (read-only), /dev, /sys (ro), /proc (ro), and a persistent dir
+# Default mounts: bind host /etc (read-only), /dev, /sys (ro), and a persistent dir
+# Avoid mounting host /proc to keep container /proc functional
 DOCKER_RUN_OPTS="-it --rm"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /etc:/etc:ro"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /dev:/dev"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /sys:/sys:ro"
-DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /proc:/proc:ro"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /tmp:/tmp"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v ${HOST_PERSIST_DIR}:/var/lib/rsdk:rw"
 

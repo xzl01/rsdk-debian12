@@ -2,10 +2,9 @@ FROM debian:12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install minimal tools
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    ca-certificates curl gnupg \
+    ca-certificates curl gnupg git build-essential devscripts dpkg-dev \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Radxa archive keyring package (latest release) and add signed repo
@@ -16,7 +15,17 @@ RUN keyring="$(mktemp)" \
   && rm -f "$keyring" \
   && echo "deb [signed-by=/usr/share/keyrings/radxa-archive-keyring.gpg] https://radxa-repo.github.io/bookworm/ bookworm main" > /etc/apt/sources.list.d/70-radxa.list
 
-# Install rsdk from Radxa repo
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends rsdk \
-  && rm -rf /var/lib/apt/lists/*
+WORKDIR /tmp
+
+# Clone rsdk, install build-deps, build deb; leave rsdk.deb in the image (not installed)
+RUN git clone --depth=1 https://github.com/radxa-pkg/rsdk.git \
+  && cd rsdk \
+  && apt-get update \
+  && apt-get build-dep -y ./ \
+  && make deb \
+  && mv ../rsdk_*.deb /opt/rsdk.deb \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /root/.cache
+
+# Optional runtime installer helper
+RUN printf '#!/bin/sh\nset -e\nif [ -f /opt/rsdk.deb ]; then dpkg -i /opt/rsdk.deb || { apt-get update && apt-get -f install -y; }; fi\n' > /usr/local/bin/install-rsdk.sh \
+  && chmod 0755 /usr/local/bin/install-rsdk.sh
