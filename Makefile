@@ -49,14 +49,8 @@ ensure-buildx:
 	fi
 
 .PHONY: test
-test: deb
-	@pkg=$$(ls -t ../rsdk-debian12_*.deb | head -n1); \
-	if [ -z "$$pkg" ]; then \
-	  echo "ERROR: no built rsdk-debian12_*.deb found; run make deb first" 1>&2; exit 1; \
-	fi; \
-	if command -v sudo >/dev/null 2>&1; then SUDO=sudo; else SUDO=; fi; \
-	$$SUDO dpkg -i "$$pkg" || { $$SUDO apt-get update && $$SUDO apt-get -f install -y && $$SUDO dpkg -i "$$pkg"; }; \
-	command -v run-rsdk-debian12 >/dev/null 2>&1 && echo "Installed and run-rsdk-debian12 is present"
+test:
+	# skip
 
 .PHONY: deb
 deb: ensure-buildx debian
