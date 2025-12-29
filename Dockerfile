@@ -26,6 +26,6 @@ RUN git clone --depth=1 https://github.com/radxa-pkg/rsdk.git \
   && mv ../rsdk_*.deb /opt/rsdk.deb \
   && rm -rf /var/lib/apt/lists/* /tmp/* /root/.cache
 
-# Optional runtime installer helper
-RUN printf '#!/bin/sh\nset -e\nif [ -f /opt/rsdk.deb ]; then dpkg -i /opt/rsdk.deb || { apt-get update && apt-get -f install -y; }; fi\n' > /usr/local/bin/install-rsdk.sh \
-  && chmod 0755 /usr/local/bin/install-rsdk.sh
+# Optional runtime installer helper (provided externally in repo)
+COPY scripts/install-rsdk.sh /usr/local/bin/install-rsdk.sh
+RUN chmod 0755 /usr/local/bin/install-rsdk.sh
