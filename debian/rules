@@ -15,30 +15,17 @@ override_dh_auto_test:
 override_dh_auto_install:
 	# Generate and stage images directly into the package dir so dh_prep won't wipe them
 	pkgdir=$(CURDIR)/debian/rsdk-debian12; \
-	archs="amd64 arm64"; \
+	arch=$$(dpkg --print-architecture); \
 	dh_auto_install --destdir="$$pkgdir" || true; \
-	for arch in $$archs; do \
-	  imgdir=$$pkgdir/usr/share/rsdk-debian12/images/$$arch; \
-	  mkdir -p $$imgdir; \
-	  if command -v docker >/dev/null 2>&1 && docker buildx version >/dev/null 2>&1; then \
-	    echo "Building $(IMAGE_NAME) for platform linux/$$arch using buildx ..."; \
-	    docker buildx build --platform=linux/$$arch -t $(IMAGE_NAME):latest -f Dockerfile --output type=tar,dest=$$imgdir/image.tar . \
-	      || { echo "ERROR: buildx build failed for $$arch (check docker/buildx permissions)" >&2; exit 1; }; \
-	  elif command -v docker >/dev/null 2>&1; then \
-	    echo "buildx not available, falling back to docker pull/save for $$arch"; \
-	    if docker pull --platform=linux/$$arch $(IMAGE_NAME) >/dev/null 2>&1; then \
-	      docker save $(IMAGE_NAME) -o $$imgdir/image.tar \
-	        || { echo "ERROR: docker save failed for $$arch (check docker permissions)" >&2; exit 1; }; \
-	    elif [ -f debian/images/$$arch/image.tar ]; then \
-	      cp debian/images/$$arch/image.tar $$imgdir/image.tar; \
-	    else \
-	      echo "ERROR: docker pull/save failed and no prebuilt image for $$arch; verify docker is running and you have permission to access /var/run/docker.sock" >&2; \
-	      exit 1; \
-	    fi; \
-	  elif [ -f debian/images/$$arch/image.tar ]; then \
-	    cp debian/images/$$arch/image.tar $$imgdir/image.tar; \
-	  else \
-	    echo "ERROR: docker not available and no prebuilt image for $$arch; install docker or provide debian/images/$$arch/image.tar" >&2; \
-	    exit 1; \
-	  fi; \
-	done
+	imgdir=$$pkgdir/usr/share/rsdk-debian12/images/$$arch; \
+	mkdir -p $$imgdir; \
+	if command -v docker >/dev/null 2>&1; then \
+	  echo "Building $(IMAGE_NAME) for current platform ..."; \
+	  docker build -t $(IMAGE_NAME) . \
+	    || { echo "ERROR: docker build failed" >&2; exit 1; }; \
+	  docker save $(IMAGE_NAME) -o $$imgdir/image.tar \
+	    || { echo "ERROR: docker save failed" >&2; exit 1; }; \
+	else \
+	  echo "ERROR: docker not available; install docker" >&2; \
+	  exit 1; \
+	fi

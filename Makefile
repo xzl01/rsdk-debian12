@@ -29,31 +29,13 @@ clean-deb:
 dch: debian/changelog
 	EDITOR=true gbp dch --debian-branch=main --commit --release --dch-opt=--upstream --multimaint-merge
 
-.PHONY: ensure-buildx
-ensure-buildx:
-	@if command -v docker >/dev/null 2>&1 && docker buildx version >/dev/null 2>&1; then \
-	  echo "docker buildx is available"; \
-	else \
-	  if command -v apt-get >/dev/null 2>&1; then \
-	    (command -v sudo >/dev/null 2>&1 && sudo apt-get update || apt-get update) >/dev/null 2>&1 || true; \
-	    (command -v sudo >/dev/null 2>&1 && sudo apt-get install -y --no-install-recommends docker-buildx-plugin docker-buildx || apt-get install -y --no-install-recommends docker-buildx-plugin docker-buildx) >/dev/null 2>&1 || true; \
-	  fi; \
-	  if command -v docker >/dev/null 2>&1 && docker buildx version >/dev/null 2>&1; then \
-	    echo "docker buildx installed via apt"; \
-	  elif [ -x scripts/install-buildx.sh ]; then \
-	    echo "docker buildx missing; installing via scripts/install-buildx.sh"; \
-	    scripts/install-buildx.sh; \
-	  else \
-	    echo "ERROR: docker buildx not available and scripts/install-buildx.sh not found" 1>&2; exit 1; \
-	  fi; \
-	fi
 
 .PHONY: test
 test:
 	# skip
 
 .PHONY: deb
-deb: ensure-buildx debian
+deb: debian
 	debuild --no-lintian --lintian-hook "lintian  --suppress-tags bad-distribution-in-changes-file -- %p_%v_*.changes" --no-sign -b
 
 .PHONY: release
