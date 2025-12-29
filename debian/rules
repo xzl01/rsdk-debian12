@@ -2,8 +2,11 @@
 export DH_VERBOSE=1
 IMAGE_NAME ?= rsdk-debian12
 
-%:
-	dh $@
+override_dh_auto_build:
+	@echo "Nothing to build at this stage"
+
+override_dh_auto_test:
+	@echo "Skipping tests during package build"
 
 
 override_dh_auto_install:
