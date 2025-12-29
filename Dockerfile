@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    ca-certificates curl gnupg git build-essential devscripts dpkg-dev \
+    ca-certificates curl gnupg git build-essential devscripts dpkg-dev sudo bash-completion \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Radxa archive keyring package (latest release) and add signed repo

@@ -46,13 +46,17 @@ fi
 HOST_PERSIST_DIR=/var/lib/rsdk-debian12
 mkdir -p "$HOST_PERSIST_DIR"
 
-# Default mounts: bind host /etc (read-only), /dev, /sys (ro), and a persistent dir
-# Avoid mounting host /proc to keep container /proc functional
+# Default mounts: bind host network config and timezone for minimal access
 DOCKER_RUN_OPTS="-it --rm"
-DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /etc:/etc:ro"
+DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS --privileged"
+DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -w /root"
+DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -e PS1='[rsdk] \u@\h:\w\$ '"
+DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /etc/resolv.conf:/etc/resolv.conf:ro"
+DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /etc/localtime:/etc/localtime:ro"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /dev:/dev"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /sys:/sys:ro"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v /tmp:/tmp"
+DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v ${HOME}:/root"
 DOCKER_RUN_OPTS="$DOCKER_RUN_OPTS -v ${HOST_PERSIST_DIR}:/var/lib/rsdk:rw"
 
 # Pass through host proxy environment variables if present
